@@ -1,6 +1,4 @@
-from .tclab import TCLab, TCLabModel, diagnose
-from .historian import Historian, Plotter
-from .experiment import Experiment, runexperiment
+from .tclab import TCLab
 from .labtime import clock, labtime, setnow
 from .version import __version__
 
@@ -32,11 +30,6 @@ def setup(connected=True, speedup=1):
         lab = TCLab
         if speedup != 1:
             raise ValueError('The real lab must run in real time')
-    else:
-        lab = TCLabModel
-        if speedup < 0:
-            raise ValueError('speedup must be positive. '
-                             'You passed speedup={}'.format(speedup))
 
     labtime.set_rate(speedup)
     return lab
