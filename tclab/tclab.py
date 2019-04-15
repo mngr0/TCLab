@@ -48,6 +48,8 @@ def find_arduino(port=''):
 class AlreadyConnectedError(BaseException):
     pass
 
+class NotConnectedError(BaseException):
+    pass
 
 class TCLab(object):
     def __init__(self, port='', debug=False):
@@ -81,14 +83,6 @@ class TCLab(object):
             print(self.version + '.')
         labtime.set_rate(1)
         labtime.start()
-        self._P1 = 200.0
-        self._P2 = 100.0
-        self.Q2(0)
-        self.sources = [('T1', self.scan),
-                        ('T2', None),
-                        ('Q1', None),
-                        ('Q2', None),
-                        ]
 
     def __enter__(self):
         return self
@@ -109,15 +103,20 @@ class TCLab(object):
         _connected = True
         self.sp = serial.Serial(port=self.port, baudrate=baud, timeout=2)
         time.sleep(2)
-        self.Q1(0)  # fails if not connected
+        self.start()  # fails if not connected
         self.baud = baud
+
+
+
+    def start(self):
+        msg=self.send_and_receive('A')
+        if (msg != "Start"):
+            raise NotConnectedError('Not connected')
 
     def close(self):
         """Shut down TCLab device and close serial connection."""
         global _connected
-
-        self.Q1(0)
-        self.Q2(0)
+        #TODO reset temperatures
         self.send_and_receive('X')
         self.sp.close()
         _connected = False
@@ -143,63 +142,15 @@ class TCLab(object):
         self.send(msg)
         return convert(self.receive())
 
-    def LED(self, val=100):
-        """Flash TCLab LED at a specified brightness for 10 seconds."""
-        return self.send_and_receive(command('LED', val), float)
-
-    @property
-    def T1(self):
-        """Return a float denoting TCLab temperature T1 in degrees C."""
-        temp = self.send_and_receive('T1', float)
+    def temperature(self, index):
+        """Return a float denoting TCLab temperature of indexed channel in degrees C."""
+        temp = self.send_and_receive('T%s'%(str(index)), float)
         return temp
 
-    @property
-    def T2(self):
-        """Return a float denoting TCLab temperature T2 in degrees C."""
-        return self.send_and_receive('T2', float)
 
-    @property
-    def P1(self):
-        """Return a float denoting maximum power of heater 1 in pwm."""
-        return self._P1
-
-    @P1.setter
-    def P1(self, val):
-        """Set maximum power of heater 1 in pwm, range 0 to 255."""
-        self._P1 = self.send_and_receive(command('P1', val, 0, 255), float)
-
-    @property
-    def P2(self):
-        """Return a float denoting maximum power of heater 2 in pwm."""
-        return self._P2
-
-    @P2.setter
-    def P2(self, val):
-        """Set maximum power of heater 2 in pwm, range 0 to 255."""
-        self._P2 = self.send_and_receive(command('P2', val, 0, 255), float)
-
-    def Q1(self, val=None):
-        """Get or set TCLab heater power Q1
-
-        val: Value of heater power, range is limited to 0-100
-
-        return clipped value."""
-        if val is None:
-            msg = 'R1'
-        else:
-            msg = 'Q1' + sep + str(clip(val))
-        return self.send_and_receive(msg, float)
-
-    def Q2(self, val=None):
-        """Get or set TCLab heater power Q2
-
-        val: Value of heater power, range is limited to 0-100
-
-        return clipped value."""
-        if val is None:
-            msg = 'R2'
-        else:
-            msg = 'Q2' + sep + str(clip(val))
+    def setpoint(self, index, val=0):
+        """set TCLab setpoint of indexed channel. return setpoint"""
+        msg = 'Q'+ str(index) + sep + str(clip(val))
         return self.send_and_receive(msg, float)
 
     def scan(self):
@@ -209,7 +160,3 @@ class TCLab(object):
         Q1 = self.Q1()  # float(self.receive())
         Q2 = self.Q2()  # float(self.receive())
         return T1, T2, Q1, Q2
-
-    # Define properties for Q1 and Q2
-    U1 = property(fget=Q1, fset=Q1, doc="Heater 1 value")
-    U2 = property(fget=Q2, fset=Q2, doc="Heater 2 value")
