@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 from __future__ import print_function
 import time
 import os
@@ -9,7 +8,6 @@ import serial
 from serial.tools import list_ports
 from .labtime import labtime
 from .version import __version__
-
 
 sep = ' '   # command/value separator in TCLab firmware
 
@@ -60,13 +58,14 @@ class TCLab(object):
             raise RuntimeError('No Arduino device found.')
 
         try:
-            self.connect(baud=115200)
+            self.connect(baud=9600)
         except AlreadyConnectedError:
             raise
-        except:
+        except Exception as e:
             try:
+                print (str(e))
                 self.sp.close()
-                self.connect(baud=9600)
+                self.connect(baud=115200)
                 print('Could not connect at high speed, but succeeded at low speed.')
                 print('This may be due to an old TCLab firmware.')
                 print('New Arduino TCLab firmware available at:')
@@ -108,7 +107,6 @@ class TCLab(object):
             raise AlreadyConnectedError('You already have an open connection')
 
         _connected = True
-
         self.sp = serial.Serial(port=self.port, baudrate=baud, timeout=2)
         time.sleep(2)
         self.Q1(0)  # fails if not connected
@@ -152,7 +150,8 @@ class TCLab(object):
     @property
     def T1(self):
         """Return a float denoting TCLab temperature T1 in degrees C."""
-        return self.send_and_receive('T1', float)
+        temp = self.send_and_receive('T1', float)
+        return temp
 
     @property
     def T2(self):
