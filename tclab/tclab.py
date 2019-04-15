@@ -68,10 +68,7 @@ class TCLab(object):
                 print (str(e))
                 self.sp.close()
                 self.connect(baud=115200)
-                print('Could not connect at high speed, but succeeded at low speed.')
-                print('This may be due to an old TCLab firmware.')
-                print('New Arduino TCLab firmware available at:')
-                print(_sketchurl)
+                print('Could not connect at low speed, but succeeded at high speed.')
             except:
                 raise RuntimeError('Failed to Connect.')
 
@@ -146,7 +143,6 @@ class TCLab(object):
         """Return a float denoting TCLab temperature of indexed channel in degrees C."""
         temp = self.send_and_receive('T%s'%(str(index)), float)
         return temp
-
 
     def setpoint(self, index, val=0):
         """set TCLab setpoint of indexed channel. return setpoint"""
