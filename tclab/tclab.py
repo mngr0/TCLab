@@ -141,7 +141,7 @@ class TCLab(object):
     def temperature(self, index):
         """Return a float denoting TCLab temperature of indexed channel in degrees C."""
         temp = self.send_and_receive('T%s'%(str(index)), float)
-	print("requesting:"+index)
+	#print("requesting:"+index)
         return temp
 
     def setpoint(self, index, val=0):
