@@ -113,7 +113,6 @@ class TCLab(object):
     def close(self):
         """Shut down TCLab device and close serial connection."""
         global _connected
-        #TODO reset temperatures
         self.send_and_receive('X')
         self.sp.close()
         _connected = False
@@ -142,6 +141,7 @@ class TCLab(object):
     def temperature(self, index):
         """Return a float denoting TCLab temperature of indexed channel in degrees C."""
         temp = self.send_and_receive('T%s'%(str(index)), float)
+	print("requesting:"+index)
         return temp
 
     def setpoint(self, index, val=0):
@@ -149,10 +149,14 @@ class TCLab(object):
         msg = 'Q'+ str(index) + sep + str(clip(val))
         return self.send_and_receive(msg, float)
 
-    def scan(self):
-        #self.send('SCAN')
-        T1 = self.T1  # float(self.receive())
-        T2 = self.T2  # float(self.receive())
-        Q1 = self.Q1()  # float(self.receive())
-        Q2 = self.Q2()  # float(self.receive())
-        return T1, T2, Q1, Q2
+
+    def enable(self, index):
+        """enables indexed channel"""
+        msg = 'E'+ str(index)
+        self.send_and_receive(msg, bool)
+
+
+    def disable(self, index):
+        """disable indexed channel"""
+        msg = 'D'+ str(index)
+        self.send_and_receive(msg, bool)
