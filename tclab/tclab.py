@@ -102,7 +102,8 @@ class TCLab(object):
         time.sleep(2)
         self.start()  # fails if not connected
         self.baud = baud
-
+        for i in range(4):
+            self.disable(i)
 
 
     def start(self):
@@ -149,12 +150,10 @@ class TCLab(object):
         msg = 'Q'+ str(index) + sep + str(clip(val))
         return self.send_and_receive(msg, float)
 
-
     def enable(self, index):
         """enables indexed channel"""
         msg = 'E'+ str(index)
         self.send_and_receive(msg, bool)
-
 
     def disable(self, index):
         """disable indexed channel"""
