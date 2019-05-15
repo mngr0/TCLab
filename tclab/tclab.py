@@ -22,14 +22,9 @@ _sketchurl = 'https://github.com/jckantor/TCLab-sketch'
 _connected = False
 
 
-def clip(val, lower=0, upper=100):
-    """Limit value to be between lower and upper limits"""
-    return max(lower, min(val, upper))
-
-
-def command(name, argument, lower=0, upper=100):
+def command(name, argument):
     """Construct command to TCLab-sketch."""
-    return name + sep + str(clip(argument, lower, upper))
+    return name + sep + str(argument)
 
 
 def find_arduino(port=''):
@@ -147,7 +142,7 @@ class TCLab(object):
 
     def setpoint(self, index, val=0):
         """set TCLab setpoint of indexed channel. return setpoint"""
-        msg = 'Q'+ str(index) + sep + str(clip(val))
+        msg = 'Q'+ str(index) + sep + str(val)
         return self.send_and_receive(msg, float)
 
     def enable(self, index):
