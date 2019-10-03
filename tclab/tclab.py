@@ -140,10 +140,16 @@ class TCLab(object):
 	#print("requesting:"+index)
         return temp
 
-    def setpoint(self, index, val=0):
+    def setsetpoint(self, index, val=0):
         """set TCLab setpoint of indexed channel. return setpoint"""
         msg = 'Q'+ str(index) + sep + str(val)
         return self.send_and_receive(msg, float)
+
+    def getsetpoint(self, index):
+        """set TCLab setpoint of indexed channel. return setpoint"""
+        msg = 'R'+ str(index)
+        return self.send_and_receive(msg, float)
+
 
     def enable(self, index):
         """enables indexed channel"""
